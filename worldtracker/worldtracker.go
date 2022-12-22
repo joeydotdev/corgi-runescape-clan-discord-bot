@@ -28,6 +28,7 @@ type World struct {
 
 var worldsMap = map[int]World{}
 
+// NewWorldTracker creates a new WorldTracker.
 func NewWorldTracker(populationThreshold int, timeWindow int) *WorldTracker {
 	return &WorldTracker{
 		populationThreshold: populationThreshold,
@@ -35,12 +36,12 @@ func NewWorldTracker(populationThreshold int, timeWindow int) *WorldTracker {
 	}
 }
 
+// PollAndCompare polls the RuneScape world population page and compares the current world data to the previous world data.
 func (w *WorldTracker) PollAndCompare() {
 	c := colly.NewCollector()
 
 	c.OnHTML(".server-list__body", func(el *colly.HTMLElement) {
 		currentWorldsMap := map[int]World{}
-		fmt.Println("Polling RuneScape world population...")
 
 		el.ForEach("tr.server-list__row", func(_ int, el *colly.HTMLElement) {
 			world := World{}
@@ -90,14 +91,23 @@ func (w *WorldTracker) PollAndCompare() {
 				return
 			}
 
-			if isIncrease {
-				fmt.Printf("World %d has increased by %d players.\n", world.WorldNumber, int(populationDifference))
-			} else {
-				fmt.Printf("World %d has decreased by %d players.\n", world.WorldNumber, int(populationDifference))
+			worldLabel := "F2P"
+			if world.Members {
+				worldLabel = "P2P"
 			}
 
-			worldsMap = currentWorldsMap
+			if world.IsPVP {
+				worldLabel = fmt.Sprintf("%s · PVP", worldLabel)
+			}
+
+			if isIncrease {
+				fmt.Printf("World %d (%s) has increased by %d players.\n", world.WorldNumber, worldLabel, int(populationDifference))
+			} else {
+				fmt.Printf("World %d (%s) has decreased by %d players.\n", world.WorldNumber, worldLabel, int(populationDifference))
+			}
 		})
+
+		worldsMap = currentWorldsMap
 	})
 
 	c.Visit(WorldPopulationURL)
