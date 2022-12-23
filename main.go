@@ -1,34 +1,44 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
-	"time"
+	"os/signal"
+	"syscall"
 
-	"github.com/joeydotdev/corgi-discord-bot/worldtracker"
+	"github.com/bwmarrin/discordgo"
+	"github.com/joeydotdev/corgi-discord-bot/config"
+	discordHandlers "github.com/joeydotdev/corgi-discord-bot/handlers"
 )
 
-var Token string
+var session *discordgo.Session
 
 func init() {
-	flag.StringVar(&Token, "t", "", "Bot Token")
-	flag.Parse()
-	fmt.Printf("Token: %s\n", Token)
+	var err error
+	config := config.Load()
+	session, err = discordgo.New("Bot " + config.Token)
+
+	if err != nil {
+		panic("failed to initalize bot")
+	}
+
+	handlers := discordHandlers.New()
+	session.AddHandler(handlers.MessageCreate)
+	session.AddHandler(handlers.Ready)
+
+	err = session.Open()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
+	fmt.Println("Bot is now running. Press CTRL-C to exit.")
+
 	sig := make(chan os.Signal, 1)
-	timeWindowInSeconds := 12
-	ticker := time.NewTicker(time.Duration(timeWindowInSeconds) * time.Second)
-	worldTracker := worldtracker.NewWorldTracker(5, timeWindowInSeconds)
-	worldTracker.PollAndCompare()
-	for {
-		select {
-		case <-ticker.C:
-			worldTracker.PollAndCompare()
-		case <-sig:
-			return
-		}
-	}
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, syscall.SIGTERM)
+	<-sig
+
+	// clean up
+	session.Close()
 }
