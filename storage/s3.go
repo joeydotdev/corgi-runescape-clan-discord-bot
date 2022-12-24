@@ -90,3 +90,24 @@ func UploadJSON(filename string, data interface{}) error {
 
 	return nil
 }
+
+// DownloadJSON downloads a JSON blob from S3
+func DownloadJSON(filename string, data interface{}) error {
+	resp, err := S3Client.GetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: &BucketName,
+		Key:    aws.String(filename),
+	}, func(options *s3.Options) {
+		options.Region = RegionName
+	})
+
+	if err != nil {
+		return err
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(data)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -21,7 +21,15 @@ type Memberlist struct {
 
 // NewMemberlist creates a new memberlist.
 func NewMemberlist() *Memberlist {
-	return &Memberlist{}
+	m := &Memberlist{}
+	m.hydrate()
+	return m
+}
+
+// hydrate hydrates the memberlist from the data store.
+func (m *Memberlist) hydrate() error {
+	err := storage.DownloadJSON("memberlist.json", m)
+	return err
 }
 
 // sync syncs the memberlist to the data store.
