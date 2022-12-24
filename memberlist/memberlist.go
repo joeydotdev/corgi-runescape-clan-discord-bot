@@ -1,6 +1,8 @@
 package memberlist
 
-import "github.com/joeydotdev/corgi-discord-bot/storage"
+import (
+	"github.com/joeydotdev/corgi-discord-bot/storage"
+)
 
 // Member is a member of the clan.
 type Member struct {
@@ -66,4 +68,34 @@ func (m *Memberlist) RemoveMembers(members []Member) {
 	for _, member := range members {
 		m.RemoveMember(member)
 	}
+}
+
+// GetMemberByName gets a member from the memberlist by their name.
+func (m *Memberlist) GetMemberByName(name string) *Member {
+	for _, v := range m.Members {
+		if v.Name == name {
+			return &v
+		}
+	}
+	return nil
+}
+
+// GetMemberByDiscordID gets a member from the memberlist by their Discord ID.
+func (m *Memberlist) GetMemberByDiscordID(discordID string) *Member {
+	for _, v := range m.Members {
+		if v.DiscordID == discordID {
+			return &v
+		}
+	}
+	return nil
+}
+
+// GetMemberByRuneScapeName gets a member from the memberlist by their RuneScape name.
+func (m *Memberlist) GetMemberByRuneScapeName(runescapeName string) *Member {
+	for _, v := range m.Members {
+		if v.RuneScapeName == runescapeName {
+			return &v
+		}
+	}
+	return nil
 }

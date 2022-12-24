@@ -11,6 +11,7 @@ var messageCreatePluginsMap map[string]plugins.Plugin
 func init() {
 	messageCreatePluginsMap = make(map[string]plugins.Plugin)
 	messageCreatePluginsMap[plugins.PingCommandPluginName] = plugins.NewPingCommandPlugin()
+	messageCreatePluginsMap[plugins.ManageMemberlistPluginName] = plugins.NewManageMemberlistPlugin()
 }
 
 // MessageCreate processes message create events emitted from Discord API
