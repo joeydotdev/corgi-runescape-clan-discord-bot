@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	memberlistentity "github.com/joeydotdev/corgi-discord-bot/memberlist"
+	hiscores "github.com/joeydotdev/osrs-hiscores"
 )
 
 const (
@@ -71,7 +72,12 @@ func getDiscordAndRuneScapeName(segments []string) (string, string, error) {
 	return discordName, runescapeName, nil
 }
 
-func handleAddMember(discordHandle, runescapeName string) error {
+func handleAddMember(segments []string) error {
+	discordHandle, runescapeName, err := getDiscordAndRuneScapeName(segments)
+	if err != nil {
+		return err
+	}
+
 	member := memberlistentity.Member{
 		DiscordHandle: discordHandle,
 		RuneScapeName: runescapeName,
@@ -81,19 +87,42 @@ func handleAddMember(discordHandle, runescapeName string) error {
 	return nil
 }
 
-func handleUpdateMember(discordHandle, runescapeName string) error {
+func handleUpdateMember(segments []string) error {
+	discordHandle, runescapeName, err := getDiscordAndRuneScapeName(segments)
+	if err != nil {
+		return err
+	}
 	updatedMember := memberlistentity.Member{
 		DiscordHandle: discordHandle,
 		RuneScapeName: runescapeName,
 	}
 
-	err := memberlist.UpdateMemberByDiscordHandle(discordHandle, updatedMember)
+	err = memberlist.UpdateMemberByDiscordHandle(discordHandle, updatedMember)
 	return err
 }
 
-func handleRemoveMember(discordHandle string) error {
-	err := memberlist.RemoveMemberByDiscordHandle(discordHandle)
+func handleRemoveMember(segments []string) error {
+	discordHandle, _, err := getDiscordAndRuneScapeName(segments)
+	if err != nil {
+		return err
+	}
+	err = memberlist.RemoveMemberByDiscordHandle(discordHandle)
 	return err
+}
+
+func filterInvalidRSNs(members []memberlistentity.Member) []memberlistentity.Member {
+	hiscores := hiscores.NewHiscores()
+	invalidMembers := []memberlistentity.Member{}
+
+	for _, member := range members {
+		overallLevel, err := hiscores.GetPlayerSkillLevel(member.RuneScapeName, "overall")
+		isValidRSN := err == nil && overallLevel > 0
+		if !isValidRSN {
+			invalidMembers = append(invalidMembers, member)
+		}
+	}
+
+	return invalidMembers
 }
 
 // Execute executes ManageMemberlistPlugin on an incoming Discord message.
@@ -113,31 +142,26 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 
 	operation := segments[1]
 	if !isValidOperation(operation) {
-		session.ChannelMessageSendReply(message.ChannelID, "Invalid operation.", message.Reference())
 		return InvalidOperationError
 	}
 
-	discordHandle, runescapeName, err := getDiscordAndRuneScapeName(segments[2:])
-	if err != nil {
-		session.ChannelMessageSendReply(message.ChannelID, "Please provide a Discord username and a RuneScape name.", message.Reference())
-		return err
-	}
-
 	session.MessageReactionAdd(message.ChannelID, message.ID, "🟦")
+
+	args := segments[2:]
+	var err error
 	switch operation {
 	case "add":
-		err = handleAddMember(discordHandle, runescapeName)
+		err = handleAddMember(args)
 	case "remove":
-		err = handleRemoveMember(discordHandle)
+		err = handleRemoveMember(args)
 	case "update":
-		err = handleUpdateMember(discordHandle, runescapeName)
+		err = handleUpdateMember(args)
 	}
 
 	session.MessageReactionRemove(message.ChannelID, message.ID, "🟦", "@me")
 
 	if err != nil {
 		session.MessageReactionAdd(message.ChannelID, message.ID, "❌")
-		session.ChannelMessageSendReply(message.ChannelID, "Error: "+err.Error(), message.Reference())
 		return err
 	}
 

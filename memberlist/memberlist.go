@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/joeydotdev/corgi-discord-bot/storage"
+	hiscores "github.com/joeydotdev/osrs-hiscores"
 )
 
 // Member is a member of the clan.
@@ -126,6 +127,25 @@ func (m *Memberlist) RemoveMemberByDiscordHandle(discordHandle string) error {
 		}
 	}
 	return nil
+}
+
+func (m *Memberlist) GetMembersWithInvalidRSNs() []Member {
+	hiscores := hiscores.NewHiscores()
+	var members []Member
+
+	for _, v := range m.Members {
+		if len(v.RuneScapeName) == 0 {
+			members = append(members, v)
+			continue
+		}
+
+		overallLevel, err := hiscores.GetPlayerSkillLevel(v.RuneScapeName, "overall")
+		if err != nil || overallLevel < 0 {
+			members = append(members, v)
+		}
+	}
+
+	return members
 }
 
 func (m *Memberlist) GetMembers() []Member {
