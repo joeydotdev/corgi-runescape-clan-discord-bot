@@ -1,6 +1,8 @@
 package memberlist
 
 import (
+	"errors"
+
 	"github.com/joeydotdev/corgi-discord-bot/storage"
 )
 
@@ -10,8 +12,8 @@ type Member struct {
 	Name string `json:"name"`
 	// Rank is the rank of the member.
 	Rank string `json:"rank"`
-	// DiscordID is the Discord ID of the member.
-	DiscordID string `json:"discord_id"`
+	// DiscordHandle is the Dicscord username and discriminator of the member.
+	DiscordHandle string `json:"discord_handle"`
 	// RuneScape Name is the RuneScape name of the member.
 	RuneScapeName string `json:"runescape_name"`
 }
@@ -80,10 +82,10 @@ func (m *Memberlist) GetMemberByName(name string) *Member {
 	return nil
 }
 
-// GetMemberByDiscordID gets a member from the memberlist by their Discord ID.
-func (m *Memberlist) GetMemberByDiscordID(discordID string) *Member {
+// GetMemberByDiscordHandle gets a member from the memberlist by their Discord Handle.
+func (m *Memberlist) GetMemberByDiscordHandle(discordHandle string) *Member {
 	for _, v := range m.Members {
-		if v.DiscordID == discordID {
+		if v.DiscordHandle == discordHandle {
 			return &v
 		}
 	}
@@ -98,4 +100,16 @@ func (m *Memberlist) GetMemberByRuneScapeName(runescapeName string) *Member {
 		}
 	}
 	return nil
+}
+
+func (m *Memberlist) UpdateMemberByDiscordHandle(discordHandle string, member Member) error {
+	for i, v := range m.Members {
+		if v.DiscordHandle == discordHandle {
+			m.Members[i] = member
+			m.sync()
+			return nil
+		}
+	}
+
+	return errors.New("Member not found by Discord handle")
 }
