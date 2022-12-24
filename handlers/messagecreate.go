@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"fmt"
-
 	"github.com/bwmarrin/discordgo"
 	"github.com/joeydotdev/corgi-discord-bot/plugins"
 )
@@ -13,7 +11,6 @@ var messageCreatePluginsMap map[string]plugins.Plugin
 func init() {
 	messageCreatePluginsMap = make(map[string]plugins.Plugin)
 	messageCreatePluginsMap[plugins.PingCommandPluginName] = plugins.NewPingCommandPlugin()
-	fmt.Println("hit")
 }
 
 // MessageCreate processes message create events emitted from Discord API
