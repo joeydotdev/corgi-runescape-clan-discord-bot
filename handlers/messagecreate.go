@@ -29,9 +29,15 @@ func (h *Handler) MessageCreate(session *discordgo.Session, messageCreate *disco
 		}
 
 		if plugin.Validate(session, messageCreate) {
+			session.MessageReactionAdd(messageCreate.ChannelID, messageCreate.ID, "🟦")
 			err := plugin.Execute(session, messageCreate)
+			session.MessageReactionRemove(messageCreate.ChannelID, messageCreate.ID, "🟦", "@me")
 			if err != nil {
+				session.MessageReactionAdd(messageCreate.ChannelID, messageCreate.ID, "❌")
 				session.ChannelMessageSend(messageCreate.ChannelID, err.Error())
+			} else {
+				// success
+				session.MessageReactionAdd(messageCreate.ChannelID, messageCreate.ID, "✅")
 			}
 		}
 	}

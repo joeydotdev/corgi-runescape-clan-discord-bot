@@ -145,8 +145,6 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 		return InvalidOperationError
 	}
 
-	session.MessageReactionAdd(message.ChannelID, message.ID, "🟦")
-
 	args := segments[2:]
 	var err error
 	switch operation {
@@ -158,14 +156,9 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 		err = handleUpdateMember(args)
 	}
 
-	session.MessageReactionRemove(message.ChannelID, message.ID, "🟦", "@me")
-
 	if err != nil {
-		session.MessageReactionAdd(message.ChannelID, message.ID, "❌")
 		return err
 	}
-
-	session.MessageReactionAdd(message.ChannelID, message.ID, "✅")
 
 	return nil
 }
