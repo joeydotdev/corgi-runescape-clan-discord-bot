@@ -34,7 +34,7 @@ func InitializeS3() error {
 	customProvider := credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithCredentialsProvider(customProvider),
-		config.WithRegion("us-east-2"),
+		config.WithRegion(RegionName),
 	)
 	if err != nil {
 		return err
