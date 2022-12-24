@@ -133,12 +133,14 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 		err = handleUpdateMember(discordHandle, runescapeName)
 	}
 
+	session.MessageReactionRemove(message.ChannelID, message.ID, "🟦", "@me")
+
 	if err != nil {
+		session.MessageReactionAdd(message.ChannelID, message.ID, "❌")
 		session.ChannelMessageSendReply(message.ChannelID, "Error: "+err.Error(), message.Reference())
 		return err
 	}
 
-	session.MessageReactionRemove(message.ChannelID, message.ID, "🟦", "@me")
 	session.MessageReactionAdd(message.ChannelID, message.ID, "✅")
 
 	return nil
