@@ -1,10 +1,14 @@
 package storage
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -59,6 +63,30 @@ func ListS3Files() error {
 	for _, obj := range resp.Contents {
 		println(*obj.Key)
 	}
+
+	return nil
+}
+
+// UploadJSON uploads a JSON blob to S3
+func UploadJSON(filename string, data interface{}) error {
+	serializedData, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	resp, err := S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: &BucketName,
+		Key:    aws.String(filename),
+		Body:   bytes.NewReader(serializedData),
+	}, func(options *s3.Options) {
+		options.Region = RegionName
+	})
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(resp)
 
 	return nil
 }
