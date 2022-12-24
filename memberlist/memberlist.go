@@ -25,8 +25,11 @@ type Memberlist struct {
 
 // NewMemberlist creates a new memberlist.
 func NewMemberlist() *Memberlist {
-	m := &Memberlist{}
+	m := &Memberlist{
+		Members: []Member{},
+	}
 	m.hydrate()
+
 	return m
 }
 
@@ -112,4 +115,19 @@ func (m *Memberlist) UpdateMemberByDiscordHandle(discordHandle string, member Me
 	}
 
 	return errors.New("Member not found by Discord handle")
+}
+
+func (m *Memberlist) RemoveMemberByDiscordHandle(discordHandle string) error {
+	for i, v := range m.Members {
+		if v.DiscordHandle == discordHandle {
+			m.Members = append(m.Members[:i], m.Members[i+1:]...)
+			m.sync()
+			return nil
+		}
+	}
+	return nil
+}
+
+func (m *Memberlist) GetMembers() []Member {
+	return m.Members
 }

@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -27,12 +26,12 @@ const (
 	RegionName string = "us-west-1"
 )
 
-// InitializeS3 initializes the S3 client
-func InitializeS3() error {
+// init initializes the S3 client
+func init() {
 	accessKey := os.Getenv("AWS_ACCESS_KEY_ID")
 	secretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
 	if accessKey == "" || secretKey == "" {
-		return MissingCredentialsError
+		panic(MissingCredentialsError)
 	}
 
 	customProvider := credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")
@@ -41,11 +40,10 @@ func InitializeS3() error {
 		config.WithRegion(RegionName),
 	)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	S3Client = s3.NewFromConfig(cfg)
-	return nil
 }
 
 // ListS3Files lists all files in the S3 bucket
@@ -74,7 +72,7 @@ func UploadJSON(filename string, data interface{}) error {
 		return err
 	}
 
-	resp, err := S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+	_, err = S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: &BucketName,
 		Key:    aws.String(filename),
 		Body:   bytes.NewReader(serializedData),
@@ -86,15 +84,13 @@ func UploadJSON(filename string, data interface{}) error {
 		return err
 	}
 
-	fmt.Println(resp)
-
 	return nil
 }
 
 // DownloadJSON downloads a JSON blob from S3
 func DownloadJSON(filename string, data interface{}) error {
 	resp, err := S3Client.GetObject(context.TODO(), &s3.GetObjectInput{
-		Bucket: &BucketName,
+		Bucket: aws.String(BucketName),
 		Key:    aws.String(filename),
 	}, func(options *s3.Options) {
 		options.Region = RegionName
@@ -104,7 +100,7 @@ func DownloadJSON(filename string, data interface{}) error {
 		return err
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(data)
+	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
 		return err
 	}

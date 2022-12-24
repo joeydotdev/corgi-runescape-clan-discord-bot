@@ -21,7 +21,7 @@ type ManageMemberlistPlugin struct{}
 var memberlist *memberlistentity.Memberlist
 
 func init() {
-	memberlist = &memberlistentity.Memberlist{}
+	memberlist = memberlistentity.NewMemberlist()
 }
 
 // Enabled returns whether or not the ManageMemberlistPlugin is enabled.
@@ -87,16 +87,28 @@ func handleUpdateMember(discordHandle, runescapeName string) error {
 		RuneScapeName: runescapeName,
 	}
 
-	memberlist.UpdateMemberByDiscordHandle(discordHandle, updatedMember)
-	return nil
+	err := memberlist.UpdateMemberByDiscordHandle(discordHandle, updatedMember)
+	return err
+}
+
+func handleRemoveMember(discordHandle string) error {
+	err := memberlist.RemoveMemberByDiscordHandle(discordHandle)
+	return err
 }
 
 // Execute executes ManageMemberlistPlugin on an incoming Discord message.
 func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *discordgo.MessageCreate) error {
 	segments := strings.Split(message.Content, " ")
 	if len(segments) < 2 {
-		session.ChannelMessageSendReply(message.ChannelID, "Please provide an operation.", message.Reference())
-		return TooFewArgumentsError
+		// list members
+		members := memberlist.GetMembers()
+		memberString := ""
+		for _, member := range members {
+			memberString += member.DiscordHandle + " - " + member.RuneScapeName + "\n"
+		}
+
+		session.ChannelMessageSendReply(message.ChannelID, memberString, message.Reference())
+		return nil
 	}
 
 	operation := segments[1]
@@ -111,14 +123,23 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 		return err
 	}
 
+	session.MessageReactionAdd(message.ChannelID, message.ID, "🟦")
 	switch operation {
 	case "add":
 		err = handleAddMember(discordHandle, runescapeName)
 	case "remove":
-		// TODO
+		err = handleRemoveMember(discordHandle)
 	case "update":
-		// TODO
+		err = handleUpdateMember(discordHandle, runescapeName)
 	}
+
+	if err != nil {
+		session.ChannelMessageSendReply(message.ChannelID, "Error: "+err.Error(), message.Reference())
+		return err
+	}
+
+	session.MessageReactionRemove(message.ChannelID, message.ID, "🟦", "@me")
+	session.MessageReactionAdd(message.ChannelID, message.ID, "✅")
 
 	return nil
 }
