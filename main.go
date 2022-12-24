@@ -9,6 +9,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/joeydotdev/corgi-discord-bot/config"
 	discordHandlers "github.com/joeydotdev/corgi-discord-bot/handlers"
+	"github.com/joeydotdev/corgi-discord-bot/storage"
 )
 
 var session *discordgo.Session
@@ -27,6 +28,11 @@ func init() {
 	session.AddHandler(handlers.Ready)
 
 	err = session.Open()
+	if err != nil {
+		panic(err)
+	}
+
+	err = storage.InitializeS3()
 	if err != nil {
 		panic(err)
 	}
