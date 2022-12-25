@@ -79,10 +79,12 @@ func NewXpTrackerEvent(name string, members []memberlistentity.Member) *XpTracke
 	}
 }
 
+// GetParticipantCount returns the number of participants in the event.
 func (x *XpTrackerEvent) GetParticipantCount() int {
 	return len(x.Participants)
 }
 
+// GetEventDuration returns the duration of the event.
 func (x *XpTrackerEvent) GetEventDuration() string {
 	start, err := time.Parse(time.RFC3339, x.StartDate)
 	if err != nil {
@@ -99,6 +101,7 @@ func (x *XpTrackerEvent) GetEventDuration() string {
 	return end.Sub(start).String()
 }
 
+// GetParticipantXpGain returns the xp gained by a participant.
 func (x *XpTrackerEvent) GetParticipantXpGain(participantName string) (XpTable, error) {
 	var selectedParticipant Participant
 	for _, v := range x.Participants {
@@ -133,6 +136,7 @@ func (x *XpTrackerEvent) GetParticipantXpGain(participantName string) (XpTable, 
 	}, nil
 }
 
+// EndEvent ends the event.
 func (x *XpTrackerEvent) EndEvent() {
 	x.IsActive = false
 	x.EndDate = time.Now().Format(time.RFC3339)
