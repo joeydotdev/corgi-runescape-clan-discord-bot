@@ -3,6 +3,7 @@ package xptracker
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -162,4 +163,27 @@ func (x *XpTrackerEvent) EndEvent() {
 		x.Participants[i].XpGainedTable = xpGained
 	}
 	x.sync()
+}
+
+// GetXpTrackerEventByUUID returns an xp tracker event by uuid.
+func GetXpTrackerEventByUUID(uuid string) (*XpTrackerEvent, error) {
+	event := &XpTrackerEvent{}
+	err := storage.DownloadJSON(fmt.Sprintf("xptracker/%s.json", uuid), event)
+	if err != nil {
+		return nil, err
+	}
+
+	return event, nil
+}
+
+// GetXpTrackerEventUUIDs returns a list of xp tracker event uuids.
+func GetXpTrackerEventUUIDs() ([]string, error) {
+	files, err := storage.ListObjects("xptracker")
+	if err != nil {
+		return nil, err
+	}
+	for i, v := range files {
+		files[i] = strings.Replace(v, ".json", "", -1)
+	}
+	return files, nil
 }

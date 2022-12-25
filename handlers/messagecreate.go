@@ -12,6 +12,7 @@ func init() {
 	messageCreatePluginsMap = make(map[string]plugins.Plugin)
 	messageCreatePluginsMap[plugins.PingCommandPluginName] = plugins.NewPingCommandPlugin()
 	messageCreatePluginsMap[plugins.ManageMemberlistPluginName] = plugins.NewManageMemberlistPlugin()
+	messageCreatePluginsMap[plugins.ManageXpTrackerPluginName] = plugins.NewManageXpTrackerPlugin()
 }
 
 // MessageCreate processes message create events emitted from Discord API

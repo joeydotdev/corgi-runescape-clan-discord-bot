@@ -49,7 +49,7 @@ func init() {
 // ListS3Files lists all files in the S3 bucket
 func ListS3Files() error {
 	resp, err := S3Client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
-		Bucket: &BucketName,
+		Bucket: aws.String(BucketName),
 	}, func(options *s3.Options) {
 		options.Region = RegionName
 	})
@@ -73,7 +73,7 @@ func UploadJSON(filename string, data interface{}) error {
 	}
 
 	_, err = S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: &BucketName,
+		Bucket: aws.String(BucketName),
 		Key:    aws.String(filename),
 		Body:   bytes.NewReader(serializedData),
 	}, func(options *s3.Options) {
@@ -106,4 +106,24 @@ func DownloadJSON(filename string, data interface{}) error {
 	}
 
 	return nil
+}
+
+func ListObjects(prefix string) ([]string, error) {
+	resp, err := S3Client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
+		Bucket: aws.String(BucketName),
+		Prefix: aws.String(prefix),
+	}, func(options *s3.Options) {
+		options.Region = RegionName
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var files []string
+	for _, obj := range resp.Contents {
+		files = append(files, *obj.Key)
+	}
+
+	return files, nil
 }
