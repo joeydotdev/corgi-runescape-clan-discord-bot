@@ -35,6 +35,7 @@ require (
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/joeydotdev/osrs-hiscores v0.0.0-20210823054940-18b00bcaee2c // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
