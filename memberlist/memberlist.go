@@ -24,6 +24,8 @@ type Memberlist struct {
 	Members []Member `json:"members"`
 }
 
+var DuplicateInMemberlistError error = errors.New("Member already exists in memberlist. Try updating instead.")
+
 // NewMemberlist creates a new memberlist.
 func NewMemberlist() *Memberlist {
 	m := &Memberlist{
@@ -47,15 +49,28 @@ func (m *Memberlist) sync() error {
 }
 
 // AddMember adds a member to the memberlist.
-func (m *Memberlist) AddMember(member Member) {
+func (m *Memberlist) AddMember(member Member) error {
+	// ensure no member with same discord is added
+	for _, v := range m.Members {
+		if v.DiscordHandle == member.DiscordHandle {
+			return DuplicateInMemberlistError
+		}
+	}
+
 	m.Members = append(m.Members, member)
 	m.sync()
+	return nil
 }
 
 // AddMembers adds multiple members to the memberlist.
-func (m *Memberlist) AddMembers(members []Member) {
-	m.Members = append(m.Members, members...)
-	m.sync()
+func (m *Memberlist) AddMembers(members []Member) error {
+	for _, member := range members {
+		err := m.AddMember(member)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // RemoveMember removes a member from the memberlist.

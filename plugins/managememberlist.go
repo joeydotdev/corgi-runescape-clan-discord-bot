@@ -6,7 +6,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	memberlistentity "github.com/joeydotdev/corgi-discord-bot/memberlist"
-	hiscores "github.com/joeydotdev/osrs-hiscores"
 )
 
 const (
@@ -83,7 +82,10 @@ func handleAddMember(segments []string) error {
 		RuneScapeName: runescapeName,
 	}
 
-	memberlist.AddMember(member)
+	err = memberlist.AddMember(member)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -108,21 +110,6 @@ func handleRemoveMember(segments []string) error {
 	}
 	err = memberlist.RemoveMemberByDiscordHandle(discordHandle)
 	return err
-}
-
-func filterInvalidRSNs(members []memberlistentity.Member) []memberlistentity.Member {
-	hiscores := hiscores.NewHiscores()
-	invalidMembers := []memberlistentity.Member{}
-
-	for _, member := range members {
-		overallLevel, err := hiscores.GetPlayerSkillLevel(member.RuneScapeName, "overall")
-		isValidRSN := err == nil && overallLevel > 0
-		if !isValidRSN {
-			invalidMembers = append(invalidMembers, member)
-		}
-	}
-
-	return invalidMembers
 }
 
 // Execute executes ManageMemberlistPlugin on an incoming Discord message.
