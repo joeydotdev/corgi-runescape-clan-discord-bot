@@ -99,7 +99,7 @@ func (x *XpTrackerEvent) GetEventDuration() string {
 	return end.Sub(start).String()
 }
 
-func (x *XpTrackerEvent) GetParticipantXpGain(participantName string) XpTable {
+func (x *XpTrackerEvent) GetParticipantXpGain(participantName string) (XpTable, error) {
 	var selectedParticipant Participant
 	for _, v := range x.Participants {
 		if v.Name == participantName {
@@ -109,7 +109,7 @@ func (x *XpTrackerEvent) GetParticipantXpGain(participantName string) XpTable {
 	}
 
 	if selectedParticipant.Name == "" {
-		return nil
+		return nil, nil
 	}
 
 	hiscores := hiscores.NewHiscores()
@@ -120,8 +120,7 @@ func (x *XpTrackerEvent) GetParticipantXpGain(participantName string) XpTable {
 	magicXp, err := hiscores.GetPlayerSkillXp(selectedParticipant.RuneScapeName, "magic")
 	hitpointsXp, err := hiscores.GetPlayerSkillXp(selectedParticipant.RuneScapeName, "hitpoints")
 	if err != nil {
-		log.Printf(err.Error())
-		return nil
+		return nil, err
 	}
 
 	return XpTable{
@@ -131,7 +130,7 @@ func (x *XpTrackerEvent) GetParticipantXpGain(participantName string) XpTable {
 		"ranged":    rangedXp - selectedParticipant.InitialXpTable["ranged"],
 		"magic":     magicXp - selectedParticipant.InitialXpTable["magic"],
 		"hitpoints": hitpointsXp - selectedParticipant.InitialXpTable["hitpoints"],
-	}
+	}, nil
 }
 
 func (x *XpTrackerEvent) EndEvent() {
@@ -139,6 +138,12 @@ func (x *XpTrackerEvent) EndEvent() {
 	x.EndDate = time.Now().Format(time.RFC3339)
 
 	for i, v := range x.Participants {
-		x.Participants[i].XpGainedTable = x.GetParticipantXpGain(v.Name)
+		xpGained, err := x.GetParticipantXpGain(v.Name)
+		if err != nil {
+			log.Printf(err.Error())
+			continue
+		}
+
+		x.Participants[i].XpGainedTable = xpGained
 	}
 }
