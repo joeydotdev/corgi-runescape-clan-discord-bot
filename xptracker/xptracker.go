@@ -1,11 +1,13 @@
 package xptracker
 
 import (
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/google/uuid"
 	memberlistentity "github.com/joeydotdev/corgi-discord-bot/memberlist"
+	"github.com/joeydotdev/corgi-discord-bot/storage"
 	hiscores "github.com/joeydotdev/osrs-hiscores"
 )
 
@@ -69,7 +71,7 @@ func NewXpTrackerEvent(name string, members []memberlistentity.Member) *XpTracke
 		})
 	}
 
-	return &XpTrackerEvent{
+	event := &XpTrackerEvent{
 		Uuid:         uuid.New().String(),
 		Name:         name,
 		IsActive:     true,
@@ -77,6 +79,15 @@ func NewXpTrackerEvent(name string, members []memberlistentity.Member) *XpTracke
 		StartDate:    time.Now().Format(time.RFC3339),
 		EndDate:      "",
 	}
+
+	event.sync()
+	return event
+}
+
+// sync syncs the xp tracker event metadata to data store.
+func (x *XpTrackerEvent) sync() error {
+	err := storage.UploadJSON(fmt.Sprintf("xptracker/%s.json", x.Uuid), x)
+	return err
 }
 
 // GetParticipantCount returns the number of participants in the event.
@@ -150,4 +161,5 @@ func (x *XpTrackerEvent) EndEvent() {
 
 		x.Participants[i].XpGainedTable = xpGained
 	}
+	x.sync()
 }
