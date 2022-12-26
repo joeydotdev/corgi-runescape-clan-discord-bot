@@ -138,11 +138,7 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 		err = m.update(args)
 	}
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func getMemberlist() *memberlistentity.Memberlist {

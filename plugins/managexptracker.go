@@ -67,12 +67,37 @@ func (m *ManageXpTrackerPlugin) stop(session *discordgo.Session, message *discor
 	return err
 }
 
-func (m *ManageXpTrackerPlugin) status(session *discordgo.Session, message *discordgo.MessageCreate) error {
-	if activeXpTrackerEvent == nil {
+func (m *ManageXpTrackerPlugin) status(args []string, session *discordgo.Session, message *discordgo.MessageCreate) error {
+	var targetEvent *xptracker.XpTrackerEvent
+	var err error
+
+	uuid := args[0]
+	if len(uuid) == 0 && activeXpTrackerEvent == nil {
 		return NoEventError
 	}
-	// TODO implement
-	return nil
+
+	if len(uuid) == 0 {
+		targetEvent = activeXpTrackerEvent
+	} else {
+		targetEvent, err = xptracker.GetXpTrackerEventByUUID(uuid)
+		if err != nil {
+			return err
+		}
+	}
+
+	if targetEvent == nil {
+		return NoEventError
+	}
+
+	_, err = session.ChannelMessageSend(message.ChannelID, fmt.Sprintf(`
+Event Name: %s
+Event UUID: %s
+Event Started: %s
+Event Ended: %s
+Event Participants: %d
+		`, targetEvent.Name, targetEvent.Uuid, targetEvent.StartDate, targetEvent.EndDate, len(targetEvent.Participants)))
+
+	return err
 }
 
 // Execute executes ManageXpTrackerPlugin on an incoming Discord message.
@@ -95,12 +120,8 @@ func (m *ManageXpTrackerPlugin) Execute(session *discordgo.Session, message *dis
 	case "stop":
 		err = m.stop(session, message)
 	case "status":
-		err = m.status(session, message)
+		err = m.status(args, session, message)
 	}
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
