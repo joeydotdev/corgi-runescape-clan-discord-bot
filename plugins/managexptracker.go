@@ -1,7 +1,11 @@
 package plugins
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
+	"github.com/joeydotdev/corgi-discord-bot/xptracker"
 )
 
 const (
@@ -9,6 +13,9 @@ const (
 )
 
 type ManageXpTrackerPlugin struct{}
+
+// activeXpTrackerEvent is the currently active tracker event.
+var activeXpTrackerEvent *xptracker.XpTrackerEvent
 
 // Enabled returns whether or not the ManageXpTrackerPlugin is enabled.
 func (m *ManageXpTrackerPlugin) Enabled() bool {
@@ -27,11 +34,73 @@ func (m *ManageXpTrackerPlugin) Name() string {
 
 // Validate validates whether or not we should execute ManageXpTrackerPlugin on an incoming Discord message.
 func (m *ManageXpTrackerPlugin) Validate(session *discordgo.Session, message *discordgo.MessageCreate) bool {
-	return message.Content == "!xptracker"
+	return strings.HasPrefix(message.Content, "!xptracker")
+}
+
+func (m *ManageXpTrackerPlugin) isValidOperation(operation string) bool {
+	return operation == "start" || operation == "stop" || operation == "status"
+}
+
+func (m *ManageXpTrackerPlugin) start(args []string, session *discordgo.Session, message *discordgo.MessageCreate) error {
+	if activeXpTrackerEvent != nil {
+		return ActiveOngoingEventError
+	}
+
+	if len(args) < 1 {
+		return TooFewArgumentsError
+	}
+
+	name := strings.Join(args, " ")
+	members := getMemberlist().GetMembers()
+	activeXpTrackerEvent = xptracker.NewXpTrackerEvent(name, members)
+	_, err := session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Successfully started event. Use `!xptracker status %s` to track the event.", activeXpTrackerEvent.Uuid))
+	return err
+}
+
+func (m *ManageXpTrackerPlugin) stop(session *discordgo.Session, message *discordgo.MessageCreate) error {
+	if activeXpTrackerEvent == nil {
+		return NoEventError
+	}
+
+	activeXpTrackerEvent.EndEvent()
+	_, err := session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Successfully ended event. Use `!xptracker status %s` to see the results.", activeXpTrackerEvent.Uuid))
+	return err
+}
+
+func (m *ManageXpTrackerPlugin) status(session *discordgo.Session, message *discordgo.MessageCreate) error {
+	if activeXpTrackerEvent == nil {
+		return NoEventError
+	}
+	// TODO implement
+	return nil
 }
 
 // Execute executes ManageXpTrackerPlugin on an incoming Discord message.
 func (m *ManageXpTrackerPlugin) Execute(session *discordgo.Session, message *discordgo.MessageCreate) error {
-	_, err := session.ChannelMessageSend(message.ChannelID, "xp tracker")
-	return err
+	segments := strings.Split(message.Content, " ")
+	if len(segments) < 2 {
+		return TooFewArgumentsError
+	}
+
+	operation := segments[1]
+	if !m.isValidOperation(operation) {
+		return InvalidOperationError
+	}
+	args := segments[2:]
+
+	var err error
+	switch operation {
+	case "start":
+		err = m.start(args, session, message)
+	case "stop":
+		err = m.stop(session, message)
+	case "status":
+		err = m.status(session, message)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -1,7 +1,6 @@
 package plugins
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -11,10 +10,6 @@ import (
 const (
 	ManageMemberlistPluginName = "ManageMemberlistCommand"
 )
-
-var TooFewArgumentsError error = errors.New("Too few arguments")
-var InvalidOperationError error = errors.New("Invalid operation. Valid operations are: add, remove, update")
-var NoDiscordUsernameAndDiscriminatorError error = errors.New("No Discord username and discriminator provided.")
 
 type ManageMemberlistPlugin struct{}
 
@@ -44,7 +39,7 @@ func (m *ManageMemberlistPlugin) Validate(session *discordgo.Session, message *d
 	return strings.HasPrefix(message.Content, "!memberlist")
 }
 
-func isValidOperation(operation string) bool {
+func (m *ManageMemberlistPlugin) isValidOperation(operation string) bool {
 	return operation == "add" || operation == "remove" || operation == "update"
 }
 
@@ -71,7 +66,7 @@ func getDiscordAndRuneScapeName(segments []string) (string, string, error) {
 	return discordName, runescapeName, nil
 }
 
-func handleAddMember(segments []string) error {
+func (m *ManageMemberlistPlugin) add(segments []string) error {
 	discordHandle, runescapeName, err := getDiscordAndRuneScapeName(segments)
 	if err != nil {
 		return err
@@ -89,7 +84,7 @@ func handleAddMember(segments []string) error {
 	return nil
 }
 
-func handleUpdateMember(segments []string) error {
+func (m *ManageMemberlistPlugin) update(segments []string) error {
 	discordHandle, runescapeName, err := getDiscordAndRuneScapeName(segments)
 	if err != nil {
 		return err
@@ -103,7 +98,7 @@ func handleUpdateMember(segments []string) error {
 	return err
 }
 
-func handleRemoveMember(segments []string) error {
+func (m *ManageMemberlistPlugin) remove(segments []string) error {
 	discordHandle, _, err := getDiscordAndRuneScapeName(segments)
 	if err != nil {
 		return err
@@ -128,7 +123,7 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 	}
 
 	operation := segments[1]
-	if !isValidOperation(operation) {
+	if !m.isValidOperation(operation) {
 		return InvalidOperationError
 	}
 
@@ -136,11 +131,11 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 	var err error
 	switch operation {
 	case "add":
-		err = handleAddMember(args)
+		err = m.add(args)
 	case "remove":
-		err = handleRemoveMember(args)
+		err = m.remove(args)
 	case "update":
-		err = handleUpdateMember(args)
+		err = m.update(args)
 	}
 
 	if err != nil {
@@ -148,4 +143,8 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 	}
 
 	return nil
+}
+
+func getMemberlist() *memberlistentity.Memberlist {
+	return memberlist
 }
