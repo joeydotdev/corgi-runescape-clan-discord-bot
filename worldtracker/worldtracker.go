@@ -104,21 +104,6 @@ func (w *WorldTracker) PollAndCompare() []WorldTrackerSpikeEvent {
 				return
 			}
 
-			// worldLabel := "F2P"
-			// if world.Members {
-			// 	worldLabel = "P2P"
-			// }
-
-			// if world.IsPVP {
-			// 	worldLabel = fmt.Sprintf("%s · PVP", worldLabel)
-			// }
-
-			// if isIncrease {
-			// 	fmt.Printf("World %d (%s) has increased by %d players.\n", world.WorldNumber, worldLabel, int(populationDifference))
-			// } else {
-			// 	fmt.Printf("World %d (%s) has decreased by %d players.\n", world.WorldNumber, worldLabel, int(populationDifference))
-			// }
-
 			spikeCount := populationDifference
 			if !isIncrease {
 				spikeCount = -spikeCount
