@@ -47,7 +47,7 @@ func NewManageWorldTrackerPlugin() *ManageWorldTrackerPlugin {
 
 // Name returns the name of the plugin.
 func (m *ManageWorldTrackerPlugin) Name() string {
-	return PingCommandPluginName
+	return ManageWorldTrackerPluginName
 }
 
 // Validate validates whether or not we should execute ManageWorldTrackerPlugin on an incoming Discord message.
