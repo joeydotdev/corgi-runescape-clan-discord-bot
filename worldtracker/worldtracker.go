@@ -12,6 +12,8 @@ import (
 const (
 	// WorldPopulationURL is the URL for RuneScape's world population page.
 	WorldPopulationURL = "https://oldschool.runescape.com/slu"
+	// WorldNumberOffset is the offset for the world number.
+	WorldNumberOffset = 300
 )
 
 type WorldTracker struct {
@@ -123,7 +125,7 @@ func (w *WorldTracker) PollAndCompare() []WorldTrackerSpikeEvent {
 			}
 
 			events = append(events, WorldTrackerSpikeEvent{
-				WorldNumber:      world.WorldNumber,
+				WorldNumber:      world.WorldNumber + WorldNumberOffset,
 				PlayerSpikeCount: spikeCount,
 				Members:          world.Members,
 				IsPVP:            world.IsPVP,
