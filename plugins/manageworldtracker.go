@@ -3,7 +3,6 @@ package plugins
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -99,36 +98,27 @@ func (m *ManageWorldTrackerPlugin) startTrackerJob(session *discordgo.Session, m
 	return stop
 }
 
-func (m *ManageWorldTrackerPlugin) start(args []string, session *discordgo.Session, message *discordgo.MessageCreate) error {
+func (m *ManageWorldTrackerPlugin) start(opts *worldtracker.WorldTrackerOpts, session *discordgo.Session, message *discordgo.MessageCreate) error {
 	if activeWorldTrackerInstance != nil {
 		return WorldTrackerAlreadyRunningError
 	}
 
-	populationThreshold, err := strconv.Atoi(args[0])
-	if err != nil {
-		return err
-	}
-	timeWindow, err := strconv.Atoi(args[1])
-	if err != nil {
-		return err
-	}
-
-	if timeWindow < MINIMUM_TIME_WINDOW {
+	if opts.Time < MINIMUM_TIME_WINDOW {
 		return WorldTrackerMinimumTimeWindowError
 	}
 
-	if populationThreshold < MINIMUM_POPULATION_THRESHOLD {
+	if opts.Threshold < MINIMUM_POPULATION_THRESHOLD {
 		return WorldTrackerMinimumPopulationThresholdError
 	}
 
 	activeWorldTrackerInstance = worldtracker.NewWorldTracker(&worldtracker.WorldTrackerConfiguration{
-		PopulationThreshold: populationThreshold,
-		TimeWindow:          timeWindow,
+		PopulationThreshold: opts.Threshold,
+		TimeWindow:          opts.Time,
 	})
 
 	activeWorldTrackerKillSwitch = m.startTrackerJob(session, message)
 
-	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("World tracker has started with population threshold of %d players and time window of %d seconds.", populationThreshold, timeWindow))
+	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("World tracker has started with population threshold of %d players and time window of %d seconds.", opts.Threshold, opts.Time))
 	return nil
 }
 
@@ -158,10 +148,13 @@ func (m *ManageWorldTrackerPlugin) Execute(session *discordgo.Session, message *
 		return errors.New(fmt.Sprintf("Invalid operation: %s - valid operations are start, stop, help", operation))
 	}
 	args := segments[2:]
-	var err error
+	opts, err := worldtracker.AdaptDiscordArgsIntoWorldTrackerOpts(args)
+	if err != nil {
+		return err
+	}
 	switch operation {
 	case "start":
-		err = m.start(args, session, message)
+		err = m.start(opts, session, message)
 	case "stop":
 		err = m.stop(session, message)
 	case "help":
