@@ -12,7 +12,7 @@ type WorldTrackerOpts struct {
 
 func AdaptDiscordArgsIntoWorldTrackerOpts(segments []string) (*WorldTrackerOpts, error) {
 	opts := &WorldTrackerOpts{}
-	_, err := flags.ParseArgs(&opts, segments)
+	_, err := flags.ParseArgs(opts, segments)
 	if err != nil {
 		return nil, err
 	}
