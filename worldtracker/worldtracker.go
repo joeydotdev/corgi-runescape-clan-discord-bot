@@ -17,11 +17,13 @@ const (
 type WorldTracker struct {
 	PopulationThreshold int
 	TimeWindow          int
+	ServerFilter        string
 }
 
 type WorldTrackerConfiguration struct {
 	PopulationThreshold int
 	TimeWindow          int
+	ServerFilter        string
 }
 
 type WorldTrackerSpikeEvent struct {
@@ -45,6 +47,7 @@ func NewWorldTracker(config *WorldTrackerConfiguration) *WorldTracker {
 	return &WorldTracker{
 		PopulationThreshold: config.PopulationThreshold,
 		TimeWindow:          config.TimeWindow,
+		ServerFilter:        config.ServerFilter,
 	}
 }
 
@@ -101,6 +104,16 @@ func (w *WorldTracker) PollAndCompare() []WorldTrackerSpikeEvent {
 			isIncrease := world.WorldPopulation > previousWorld.WorldPopulation
 			if populationDifference < w.PopulationThreshold {
 				// The population difference is less than the threshold, so we don't care.
+				return
+			}
+
+			if w.ServerFilter == "F2P" && world.Members {
+				// We're only interested in F2P worlds.
+				return
+			}
+
+			if w.ServerFilter == "P2P" && !world.Members {
+				// We're only interested in P2P worlds.
 				return
 			}
 

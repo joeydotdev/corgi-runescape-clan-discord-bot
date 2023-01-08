@@ -25,6 +25,7 @@ const NEGATIVE_COLOR = 0x9f1239
 var WorldTrackerAlreadyRunningError error = errors.New("World tracker is already running. Stop the current instance before starting a new one.")
 var WorldTrackerMinimumTimeWindowError error = errors.New(fmt.Sprintf("Time window must be greater than %d seconds.", MINIMUM_TIME_WINDOW))
 var WorldTrackerMinimumPopulationThresholdError error = errors.New(fmt.Sprintf("Population threshold must be greater than %d.", MINIMUM_POPULATION_THRESHOLD))
+var WorldTrackerFilterServerError error = errors.New("Filter must be either f2p, p2p, or all")
 
 var activeWorldTrackerInstance *worldtracker.WorldTracker
 var activeWorldTrackerKillSwitch chan bool
@@ -111,14 +112,19 @@ func (m *ManageWorldTrackerPlugin) start(opts *worldtracker.WorldTrackerOpts, se
 		return WorldTrackerMinimumPopulationThresholdError
 	}
 
+	if opts.Filter != "f2p" && opts.Filter != "p2p" && opts.Filter != "all" {
+		return WorldTrackerFilterServerError
+	}
+
 	activeWorldTrackerInstance = worldtracker.NewWorldTracker(&worldtracker.WorldTrackerConfiguration{
 		PopulationThreshold: opts.Threshold,
 		TimeWindow:          opts.Time,
+		ServerFilter:        strings.ToUpper(opts.Filter),
 	})
 
 	activeWorldTrackerKillSwitch = m.startTrackerJob(session, message)
 
-	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("World tracker has started with population threshold of %d players and time window of %d seconds.", opts.Threshold, opts.Time))
+	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("World tracker has started on server %s with population threshold of %d players and time window of %d seconds.", opts.Filter, opts.Threshold, opts.Time))
 	return nil
 }
 
@@ -133,7 +139,7 @@ func (m *ManageWorldTrackerPlugin) stop(session *discordgo.Session, message *dis
 }
 
 func (m *ManageWorldTrackerPlugin) help(session *discordgo.Session, message *discordgo.MessageCreate) error {
-	_, err := session.ChannelMessageSend(message.ChannelID, "Usage: `!worldtracker start <population threshold> <time window in seconds>`")
+	_, err := session.ChannelMessageSend(message.ChannelID, "Usage: `!worldtracker start --threshold <population threshold> --time <time window in seconds> --filter <f2p|p2p|all>`")
 	return err
 }
 
