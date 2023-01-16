@@ -77,7 +77,7 @@ func (w *WorldTracker) PollAndCompare() []WorldTrackerSpikeEvent {
 						fmt.Println("Error parsing world number: " + sanitizedWorldString)
 						break
 					}
-					world.WorldNumber = worldNumber
+					world.WorldNumber = worldNumber + WorldNumberOffset
 				case 1:
 					var sanitizedPopulationString string
 					sanitizedPopulationString = strings.TrimSpace(el.Text)
@@ -125,7 +125,7 @@ func (w *WorldTracker) PollAndCompare() []WorldTrackerSpikeEvent {
 			}
 
 			events = append(events, WorldTrackerSpikeEvent{
-				WorldNumber:      world.WorldNumber + WorldNumberOffset,
+				WorldNumber:      world.WorldNumber,
 				PlayerSpikeCount: spikeCount,
 				Members:          world.Members,
 				IsPVP:            world.IsPVP,
