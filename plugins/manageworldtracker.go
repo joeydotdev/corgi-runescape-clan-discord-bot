@@ -17,10 +17,13 @@ const (
 
 type ManageWorldTrackerPlugin struct{}
 
-const MINIMUM_TIME_WINDOW = 10
-const MINIMUM_POPULATION_THRESHOLD = 8
-const POSITIVE_COLOR = 0x86efac
-const NEGATIVE_COLOR = 0x9f1239
+const (
+	MINIMUM_TIME_WINDOW          = 10
+	MINIMUM_POPULATION_THRESHOLD = 8
+	POSITIVE_COLOR               = 0x86efac
+	NEGATIVE_COLOR               = 0x9f1239
+	MAXIMUM_EVENTS_PER_CYCLE     = 10
+)
 
 var WorldTrackerAlreadyRunningError error = errors.New("World tracker is already running. Stop the current instance before starting a new one.")
 var WorldTrackerMinimumTimeWindowError error = errors.New(fmt.Sprintf("Time window must be greater than %d seconds.", MINIMUM_TIME_WINDOW))
@@ -57,6 +60,14 @@ func (m *ManageWorldTrackerPlugin) Validate(session *discordgo.Session, message 
 
 // sendTrackerEventMessages sends messages to Discord for each world tracker event.
 func (m *ManageWorldTrackerPlugin) sendTrackerEventMessages(session *discordgo.Session, message *discordgo.MessageCreate, events []worldtracker.WorldTrackerSpikeEvent) {
+	if len(events) > MAXIMUM_EVENTS_PER_CYCLE {
+		session.ChannelMessageSendEmbed(message.ChannelID, &discordgo.MessageEmbed{
+			Description: fmt.Sprintf("**%d worlds** with a change of %d or greater", len(events), activeWorldTrackerInstance.PopulationThreshold),
+			Color:       POSITIVE_COLOR,
+		})
+		return
+	}
+
 	for _, event := range events {
 		isIncrease := event.PlayerSpikeCount > 0
 		worldLabel := "F2P"
@@ -67,10 +78,10 @@ func (m *ManageWorldTrackerPlugin) sendTrackerEventMessages(session *discordgo.S
 		var m string
 		var color int
 		if isIncrease {
-			m = fmt.Sprintf("World %d (%s) has increased by %d players.\n", event.WorldNumber, worldLabel, event.PlayerSpikeCount)
+			m = fmt.Sprintf("**World %d (%s)** has increased by **%d** players.\n", event.WorldNumber, worldLabel, event.PlayerSpikeCount)
 			color = POSITIVE_COLOR
 		} else {
-			m = fmt.Sprintf("World %d (%s) has decreased by %d players.\n", event.WorldNumber, worldLabel, event.PlayerSpikeCount)
+			m = fmt.Sprintf("**World %d (%s)** has decreased by **%d** players.\n", event.WorldNumber, worldLabel, event.PlayerSpikeCount)
 			color = NEGATIVE_COLOR
 		}
 
