@@ -3,20 +3,28 @@ package memberlist
 import (
 	"errors"
 
-	"github.com/joeydotdev/corgi-discord-bot/storage"
 	hiscores "github.com/joeydotdev/osrs-hiscores"
 )
 
+type RuneScapeAccounts struct {
+	LPC  string `json:"lpc"`
+	XLPC string `json:"xlpc"`
+}
+
 // Member is a member of the clan.
 type Member struct {
+	// Uuid is the UUID of the member.
+	Uuid string `json:"uuid"`
 	// Name is the name of the member.
 	Name string `json:"name"`
 	// Rank is the rank of the member.
 	Rank string `json:"rank"`
 	// DiscordHandle is the Dicscord username and discriminator of the member.
-	DiscordHandle string `json:"discord_handle"`
-	// RuneScape Name is the RuneScape name of the member.
-	RuneScapeName string `json:"runescape_name"`
+	DiscordID string `json:"discord_id"`
+	// TeamSpeakID is the TeamSpeak ID of the member.
+	TeamSpeakID string `json:"teamspeak_id"`
+	// RuneScapeAccounts is a list of the member's RuneScape accounts.
+	Accounts RuneScapeAccounts `json:"runescape_accounts"`
 }
 
 type Memberlist struct {
@@ -38,57 +46,32 @@ func NewMemberlist() *Memberlist {
 
 // hydrate hydrates the memberlist from the data store.
 func (m *Memberlist) hydrate() error {
-	err := storage.DownloadJSON("memberlist.json", m)
-	return err
-}
-
-// sync syncs the memberlist to the data store.
-func (m *Memberlist) sync() error {
-	err := storage.UploadJSON("memberlist.json", m)
-	return err
-}
-
-// AddMember adds a member to the memberlist.
-func (m *Memberlist) AddMember(member Member) error {
-	// ensure no member with same discord is added
-	for _, v := range m.Members {
-		if v.DiscordHandle == member.DiscordHandle {
-			return DuplicateInMemberlistError
-		}
+	resp, err := GetMemberlistSheet()
+	if err != nil {
+		return err
 	}
 
-	m.Members = append(m.Members, member)
-	m.sync()
+	for _, v := range resp.Values {
+		if len(v) < 5 {
+			continue
+		}
+
+		member := Member{
+			Uuid:        v[0].(string),
+			Name:        v[1].(string),
+			DiscordID:   v[2].(string),
+			TeamSpeakID: v[3].(string),
+			Accounts: RuneScapeAccounts{
+				XLPC: v[4].(string),
+				LPC:  v[5].(string),
+			},
+			Rank: v[6].(string),
+		}
+
+		m.Members = append(m.Members, member)
+	}
+
 	return nil
-}
-
-// AddMembers adds multiple members to the memberlist.
-func (m *Memberlist) AddMembers(members []Member) error {
-	for _, member := range members {
-		err := m.AddMember(member)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// RemoveMember removes a member from the memberlist.
-func (m *Memberlist) RemoveMember(member Member) {
-	for i, v := range m.Members {
-		if v == member {
-			m.Members = append(m.Members[:i], m.Members[i+1:]...)
-			m.sync()
-			return
-		}
-	}
-}
-
-// RemoveMembers removes multiple members from the memberlist.
-func (m *Memberlist) RemoveMembers(members []Member) {
-	for _, member := range members {
-		m.RemoveMember(member)
-	}
 }
 
 // GetMemberByName gets a member from the memberlist by their name.
@@ -101,10 +84,10 @@ func (m *Memberlist) GetMemberByName(name string) *Member {
 	return nil
 }
 
-// GetMemberByDiscordHandle gets a member from the memberlist by their Discord Handle.
-func (m *Memberlist) GetMemberByDiscordHandle(discordHandle string) *Member {
+// GetMemberByDiscordID gets a member from the memberlist by their Discord ID.
+func (m *Memberlist) GetMemberByDiscordID(discordId string) *Member {
 	for _, v := range m.Members {
-		if v.DiscordHandle == discordHandle {
+		if v.DiscordID == discordId {
 			return &v
 		}
 	}
@@ -114,47 +97,45 @@ func (m *Memberlist) GetMemberByDiscordHandle(discordHandle string) *Member {
 // GetMemberByRuneScapeName gets a member from the memberlist by their RuneScape name.
 func (m *Memberlist) GetMemberByRuneScapeName(runescapeName string) *Member {
 	for _, v := range m.Members {
-		if v.RuneScapeName == runescapeName {
+		if v.Accounts.LPC == runescapeName || v.Accounts.XLPC == runescapeName {
 			return &v
 		}
 	}
 	return nil
 }
 
-func (m *Memberlist) UpdateMemberByDiscordHandle(discordHandle string, member Member) error {
-	for i, v := range m.Members {
-		if v.DiscordHandle == discordHandle {
-			m.Members[i] = member
-			m.sync()
-			return nil
-		}
-	}
-
-	return errors.New("Member not found by Discord handle")
-}
-
-func (m *Memberlist) RemoveMemberByDiscordHandle(discordHandle string) error {
-	for i, v := range m.Members {
-		if v.DiscordHandle == discordHandle {
-			m.Members = append(m.Members[:i], m.Members[i+1:]...)
-			m.sync()
-			return nil
-		}
-	}
-	return nil
-}
-
-func (m *Memberlist) GetMembersWithInvalidRSNs() []Member {
+// GetMembersWithInvalidXLPCRSNs gets a list of members with invalid XLPC RSNs.
+func (m *Memberlist) GetMembersWithInvalidXLPCRSNs() []Member {
 	hiscores := hiscores.NewHiscores()
 	var members []Member
 
 	for _, v := range m.Members {
-		if len(v.RuneScapeName) == 0 {
+		if len(v.Accounts.XLPC) == 0 {
 			members = append(members, v)
 			continue
 		}
 
-		overallLevel, err := hiscores.GetPlayerSkillLevel(v.RuneScapeName, "overall")
+		overallLevel, err := hiscores.GetPlayerSkillLevel(v.Accounts.XLPC, "overall")
+		if err != nil || overallLevel < 0 {
+			members = append(members, v)
+		}
+	}
+
+	return members
+}
+
+// GetMembersWithInvalidLPCRSNs gets a list of members with invalid LPC RSNs.
+func (m *Memberlist) GetMembersWithInvalidLPCRSNs() []Member {
+	hiscores := hiscores.NewHiscores()
+	var members []Member
+
+	for _, v := range m.Members {
+		if len(v.Accounts.LPC) == 0 {
+			members = append(members, v)
+			continue
+		}
+
+		overallLevel, err := hiscores.GetPlayerSkillLevel(v.Accounts.LPC, "overall")
 		if err != nil || overallLevel < 0 {
 			members = append(members, v)
 		}

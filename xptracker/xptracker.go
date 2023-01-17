@@ -47,12 +47,12 @@ func NewXpTrackerEvent(name string, members []memberlistentity.Member) *XpTracke
 	participants := []Participant{}
 
 	for _, v := range members {
-		attackXp, err := hiscores.GetPlayerSkillXp(v.RuneScapeName, "attack")
-		strengthXp, err := hiscores.GetPlayerSkillXp(v.RuneScapeName, "strength")
-		defenceXp, err := hiscores.GetPlayerSkillXp(v.RuneScapeName, "defence")
-		rangedXp, err := hiscores.GetPlayerSkillXp(v.RuneScapeName, "ranged")
-		magicXp, err := hiscores.GetPlayerSkillXp(v.RuneScapeName, "magic")
-		hitpointsXp, err := hiscores.GetPlayerSkillXp(v.RuneScapeName, "hitpoints")
+		attackXp, err := hiscores.GetPlayerSkillXp(v.Accounts.LPC, "attack")
+		strengthXp, err := hiscores.GetPlayerSkillXp(v.Accounts.LPC, "strength")
+		defenceXp, err := hiscores.GetPlayerSkillXp(v.Accounts.LPC, "defence")
+		rangedXp, err := hiscores.GetPlayerSkillXp(v.Accounts.LPC, "ranged")
+		magicXp, err := hiscores.GetPlayerSkillXp(v.Accounts.LPC, "magic")
+		hitpointsXp, err := hiscores.GetPlayerSkillXp(v.Accounts.LPC, "hitpoints")
 		if err != nil {
 			log.Printf(err.Error())
 			continue
@@ -60,7 +60,7 @@ func NewXpTrackerEvent(name string, members []memberlistentity.Member) *XpTracke
 
 		participants = append(participants, Participant{
 			Name:          v.Name,
-			RuneScapeName: v.RuneScapeName,
+			RuneScapeName: v.Accounts.LPC,
 			InitialXpTable: XpTable{
 				"attack":    attackXp,
 				"strength":  strengthXp,

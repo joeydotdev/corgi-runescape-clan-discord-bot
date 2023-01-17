@@ -67,44 +67,11 @@ func getDiscordAndRuneScapeName(segments []string) (string, string, error) {
 }
 
 func (m *ManageMemberlistPlugin) add(segments []string) error {
-	discordHandle, runescapeName, err := getDiscordAndRuneScapeName(segments)
-	if err != nil {
-		return err
-	}
-
-	member := memberlistentity.Member{
-		DiscordHandle: discordHandle,
-		RuneScapeName: runescapeName,
-	}
-
-	err = memberlist.AddMember(member)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
-func (m *ManageMemberlistPlugin) update(segments []string) error {
-	discordHandle, runescapeName, err := getDiscordAndRuneScapeName(segments)
-	if err != nil {
-		return err
-	}
-	updatedMember := memberlistentity.Member{
-		DiscordHandle: discordHandle,
-		RuneScapeName: runescapeName,
-	}
-
-	err = memberlist.UpdateMemberByDiscordHandle(discordHandle, updatedMember)
-	return err
-}
-
 func (m *ManageMemberlistPlugin) remove(segments []string) error {
-	discordHandle, _, err := getDiscordAndRuneScapeName(segments)
-	if err != nil {
-		return err
-	}
-	err = memberlist.RemoveMemberByDiscordHandle(discordHandle)
-	return err
+	return nil
 }
 
 // Execute executes ManageMemberlistPlugin on an incoming Discord message.
@@ -115,7 +82,7 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 		members := memberlist.GetMembers()
 		memberString := ""
 		for _, member := range members {
-			memberString += member.DiscordHandle + " - " + member.RuneScapeName + "\n"
+			memberString += member.Name + " - " + member.Accounts.LPC + "\n"
 		}
 
 		session.ChannelMessageSendReply(message.ChannelID, memberString, message.Reference())
@@ -135,7 +102,6 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 	case "remove":
 		err = m.remove(args)
 	case "update":
-		err = m.update(args)
 	}
 
 	return err
