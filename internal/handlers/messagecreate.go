@@ -14,6 +14,7 @@ func init() {
 	messageCreatePluginsMap[plugins.ManageMemberlistPluginName] = plugins.NewManageMemberlistPlugin()
 	messageCreatePluginsMap[plugins.ManageXpTrackerPluginName] = plugins.NewManageXpTrackerPlugin()
 	messageCreatePluginsMap[plugins.ManageWorldTrackerPluginName] = plugins.NewManageWorldTrackerPlugin()
+	messageCreatePluginsMap[plugins.MissingMembersPluginName] = plugins.NewMissingMembersPlugin()
 }
 
 // MessageCreate processes message create events emitted from Discord API
