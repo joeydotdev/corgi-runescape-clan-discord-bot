@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	memberlistentity "github.com/joeydotdev/corgi-discord-bot/memberlist"
-	"github.com/joeydotdev/corgi-discord-bot/storage"
+	memberlistentity "github.com/joeydotdev/corgi-discord-bot/internal/memberlist"
+	"github.com/joeydotdev/corgi-discord-bot/internal/storage"
 	hiscores "github.com/joeydotdev/osrs-hiscores"
 )
 

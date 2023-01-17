@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/joeydotdev/corgi-discord-bot/xptracker"
+	"github.com/joeydotdev/corgi-discord-bot/internal/xptracker"
 )
 
 const (

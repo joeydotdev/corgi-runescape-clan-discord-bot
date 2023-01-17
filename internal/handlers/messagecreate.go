@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/joeydotdev/corgi-discord-bot/plugins"
+	"github.com/joeydotdev/corgi-discord-bot/internal/plugins"
 )
 
 var messageCreatePluginsMap map[string]plugins.Plugin

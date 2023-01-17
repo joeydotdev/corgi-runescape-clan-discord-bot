@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/joeydotdev/corgi-discord-bot/worldtracker"
+	"github.com/joeydotdev/corgi-discord-bot/internal/worldtracker"
 )
 
 const (

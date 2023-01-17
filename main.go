@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
-	discordHandlers "github.com/joeydotdev/corgi-discord-bot/handlers"
+	discordHandlers "github.com/joeydotdev/corgi-discord-bot/internal/handlers"
 )
 
 var session *discordgo.Session

@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	memberlistentity "github.com/joeydotdev/corgi-discord-bot/memberlist"
+	memberlistentity "github.com/joeydotdev/corgi-discord-bot/internal/memberlist"
 )
 
 const (
