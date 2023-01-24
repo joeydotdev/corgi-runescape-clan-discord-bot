@@ -44,10 +44,12 @@ require (
 	github.com/jessevdk/go-flags v1.5.0 // indirect
 	github.com/joeydotdev/osrs-hiscores v0.0.0-20210823054940-18b00bcaee2c // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/multiplay/go-ts3 v1.1.0 // indirect
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/oauth2 v0.4.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
