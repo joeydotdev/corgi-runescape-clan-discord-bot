@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/joeydotdev/corgi-discord-bot/internal/plugins"
 )
@@ -15,17 +17,20 @@ func init() {
 	messageCreatePluginsMap[plugins.ManageXpTrackerPluginName] = plugins.NewManageXpTrackerPlugin()
 	messageCreatePluginsMap[plugins.ManageWorldTrackerPluginName] = plugins.NewManageWorldTrackerPlugin()
 	messageCreatePluginsMap[plugins.MissingMembersPluginName] = plugins.NewMissingMembersPlugin()
+	messageCreatePluginsMap[plugins.AttendanceCommandPluginName] = plugins.NewAttendanceCommandPlugin()
 }
 
 // MessageCreate processes message create events emitted from Discord API
 // https://discordapp.com/developers/docs/topics/gateway#message-create
 func (h *Handler) MessageCreate(session *discordgo.Session, messageCreate *discordgo.MessageCreate) {
+	fmt.Println("MessageCreate event received")
 	if messageCreate.Author.ID == session.State.User.ID {
 		// Ignore messages sent by the bot
 		return
 	}
 
 	for _, plugin := range messageCreatePluginsMap {
+		fmt.Println("Processing plugin: ", plugin.Name())
 		if !plugin.Enabled() {
 			// Skip disabled plugins
 			continue
