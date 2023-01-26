@@ -7,15 +7,17 @@ import (
 	"github.com/multiplay/go-ts3"
 )
 
-var TS3Client *ts3.Client
+type TeamSpeakClient struct {
+	c *ts3.Client
+}
 
-func GetClientsInEventChannels() []*ts3.OnlineClient {
+func (t *TeamSpeakClient) GetClientsInEventChannels() []*ts3.OnlineClient {
 	EVENT_CHANNEL_IDS := []int{3, 4, 17, 5, 6}
 
-	onlineUsers, _ := TS3Client.Server.ClientList()
+	onlineUsers, _ := t.c.Server.ClientList()
 	attendees := make([]*ts3.OnlineClient, 0, len(onlineUsers))
 
-	clients, err := TS3Client.Server.ClientList()
+	clients, err := t.c.Server.ClientList()
 	if err != nil {
 		panic(err)
 	}
@@ -31,7 +33,7 @@ func GetClientsInEventChannels() []*ts3.OnlineClient {
 	return attendees
 }
 
-func init() {
+func NewTeamSpeakClient() *TeamSpeakClient {
 	serverAddress := os.Getenv("TS3_SERVER_QUERY_ADDRESS")
 	serverQueryUsername := os.Getenv("TS3_SERVER_QUERY_USERNAME")
 	serverQueryPassword := os.Getenv("TS3_SERVER_QUERY_PASSWORD")
@@ -55,6 +57,7 @@ func init() {
 	}
 
 	log.Println("Connected to teamspeak server")
-
-	TS3Client = c
+	return &TeamSpeakClient{
+		c: c,
+	}
 }

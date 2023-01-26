@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/joeydotdev/corgi-discord-bot/internal/teamspeak"
+	teamspeakentity "github.com/joeydotdev/corgi-discord-bot/internal/teamspeak"
 )
 
 const (
@@ -14,6 +14,8 @@ const (
 
 type AttendanceCommandPlugin struct{}
 
+var ts3client *teamspeakentity.TeamSpeakClient
+
 // Enabled returns whether or not the AttendanceCommandPlugin is enabled.
 func (a *AttendanceCommandPlugin) Enabled() bool {
 	return true
@@ -21,6 +23,7 @@ func (a *AttendanceCommandPlugin) Enabled() bool {
 
 // NewAttendanceCommandPlugin creates a new AttendanceCommandPlugin.
 func NewAttendanceCommandPlugin() *AttendanceCommandPlugin {
+	ts3client = teamspeakentity.NewTeamSpeakClient()
 	return &AttendanceCommandPlugin{}
 }
 
@@ -48,7 +51,7 @@ func (a *AttendanceCommandPlugin) Execute(session *discordgo.Session, message *d
 	}
 
 	messageString := fmt.Sprintf("Attendance for **%s**:\n", attendanceSnapshotName)
-	clients := teamspeak.GetClientsInEventChannels()
+	clients := ts3client.GetClientsInEventChannels()
 	for _, client := range clients {
 		messageString += fmt.Sprintf("%s\n", client.Nickname)
 	}
