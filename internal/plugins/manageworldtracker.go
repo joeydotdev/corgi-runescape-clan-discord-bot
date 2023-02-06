@@ -12,7 +12,7 @@ import (
 
 const (
 	ManageWorldTrackerPluginName = "ManageWorldTrackerPlugin"
-	WorldTrackerChannelID        = "1042819494441124034"
+	WorldTrackerChannelID        = "1013834768632250368"
 )
 
 type ManageWorldTrackerPlugin struct{}
