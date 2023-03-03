@@ -18,7 +18,7 @@ var ts3client *teamspeakentity.TeamSpeakClient
 
 // Enabled returns whether or not the AttendanceCommandPlugin is enabled.
 func (a *AttendanceCommandPlugin) Enabled() bool {
-	return true
+	return false
 }
 
 // NewAttendanceCommandPlugin creates a new AttendanceCommandPlugin.
