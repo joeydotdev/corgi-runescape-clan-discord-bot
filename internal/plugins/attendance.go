@@ -23,7 +23,13 @@ func (a *AttendanceCommandPlugin) Enabled() bool {
 
 // NewAttendanceCommandPlugin creates a new AttendanceCommandPlugin.
 func NewAttendanceCommandPlugin() *AttendanceCommandPlugin {
-	ts3client = teamspeakentity.NewTeamSpeakClient()
+	var err error
+	ts3client, err = teamspeakentity.NewTeamSpeakClient()
+	if err != nil {
+		fmt.Println("Failed to create new TeamSpeak client: ", err)
+		return nil
+	}
+
 	return &AttendanceCommandPlugin{}
 }
 
@@ -51,11 +57,15 @@ func (a *AttendanceCommandPlugin) Execute(session *discordgo.Session, message *d
 	}
 
 	messageString := fmt.Sprintf("Attendance for **%s**:\n", attendanceSnapshotName)
-	clients := ts3client.GetClientsInEventChannels()
+	clients, err := ts3client.GetClientsInEventChannels()
+	if err != nil {
+		return err
+	}
+
 	for _, client := range clients {
 		messageString += fmt.Sprintf("%s\n", client.Nickname)
 	}
 
-	_, err := session.ChannelMessageSend(message.ChannelID, messageString)
+	_, err = session.ChannelMessageSend(message.ChannelID, messageString)
 	return err
 }
