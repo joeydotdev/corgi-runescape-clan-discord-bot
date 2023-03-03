@@ -17,10 +17,11 @@ func init() {
 	messageCreatePluginsMap[plugins.ManageXpTrackerPluginName] = plugins.NewManageXpTrackerPlugin()
 	messageCreatePluginsMap[plugins.ManageWorldTrackerPluginName] = plugins.NewManageWorldTrackerPlugin()
 	messageCreatePluginsMap[plugins.MissingMembersPluginName] = plugins.NewMissingMembersPlugin()
+	messageCreatePluginsMap[plugins.MassPMCommandPluginName] = plugins.NewMassPMCommandPlugin()
 
 	// TODO: This is a temporary hack to get attendance working. We need to figure out a better way to do this.
 	if plugin := plugins.NewAttendanceCommandPlugin(); plugin != nil {
-		messageCreatePluginsMap[plugins.AttendanceCommandPluginName] = plugins.NewAttendanceCommandPlugin()
+		messageCreatePluginsMap[plugins.AttendanceCommandPluginName] = plugin
 	}
 }
 

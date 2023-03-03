@@ -40,7 +40,6 @@ func (a *AttendanceCommandPlugin) Name() string {
 
 // Validate validates whether or not we should execute AttendanceCommandPlugin on an incoming Discord message.
 func (a *AttendanceCommandPlugin) Validate(session *discordgo.Session, message *discordgo.MessageCreate) bool {
-	fmt.Println("Validating AttendanceCommandPlugin")
 	return strings.HasPrefix(message.Content, "!attendance")
 }
 
