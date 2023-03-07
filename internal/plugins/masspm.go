@@ -15,17 +15,16 @@ const (
 var (
 	ROLE_IDS []string = []string{
 		"692876249118539817",  // Leader
-		"1070076373781205143", // PK Leader
-		// "692879184024043540",  // High Council
-		// "692879285417017375",  // Council
-		// "817499802148274226",  // Leadership
-		// "692879600380018699",  // Officer
-		// "692879942777569312",  // Legend
-		// "1024119526801023006", // Old School
-		// "692880299855446106",  // Veteran
-		// "699354924185682031",  // Advanced
-		// "692880390440091659",  // Member
-		// "773216677423874048",  // Applicant
+		"692879184024043540",  // High Council
+		"692879285417017375",  // Council
+		"817499802148274226",  // Leadership
+		"692879600380018699",  // Officer
+		"692879942777569312",  // Legend
+		"1024119526801023006", // Old School
+		"692880299855446106",  // Veteran
+		"699354924185682031",  // Advanced
+		"692880390440091659",  // Member
+		"773216677423874048",  // Applicant
 	}
 	EXCLUDED_USER_IDS []string = []string{
 		"223169696055296011", // joey
@@ -62,7 +61,6 @@ func (p *MassPMCommandPlugin) Execute(session *discordgo.Session, message *disco
 		return TooFewArgumentsError
 	}
 
-	// get the message to send
 	messageToSend := strings.Join(segments[1:], " ")
 	if len(messageToSend) == 0 {
 		return TooFewArgumentsError
