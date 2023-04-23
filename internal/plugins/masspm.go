@@ -9,7 +9,7 @@ import (
 
 const (
 	MassPMCommandPluginName = "MassPMCommandPlugin"
-	MassPMChannelID         = "1070035899221545171"
+	MassPMChannelID         = "1082687782331351090"
 )
 
 var (
