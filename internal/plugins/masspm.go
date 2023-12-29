@@ -24,7 +24,7 @@ var (
 		"692880299855446106",  // Veteran
 		"699354924185682031",  // Advanced
 		"692880390440091659",  // Member
-		"773216677423874048",  // Applicant
+		// "773216677423874048",  // Applicant
 	}
 	EXCLUDED_USER_IDS []string = []string{
 		"223169696055296011", // joey
