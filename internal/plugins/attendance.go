@@ -23,6 +23,12 @@ func (a *AttendanceCommandPlugin) Enabled() bool {
 
 // NewAttendanceCommandPlugin creates a new AttendanceCommandPlugin.
 func NewAttendanceCommandPlugin() *AttendanceCommandPlugin {
+	plugin := &AttendanceCommandPlugin{}
+	if !plugin.Enabled() {
+		// Avoid creating a new TeamSpeak client if the plugin is disabled.
+		return plugin
+	}
+
 	var err error
 	ts3client, err = teamspeakentity.NewTeamSpeakClient()
 	if err != nil {
@@ -30,7 +36,7 @@ func NewAttendanceCommandPlugin() *AttendanceCommandPlugin {
 		return nil
 	}
 
-	return &AttendanceCommandPlugin{}
+	return plugin
 }
 
 // Name returns the name of the plugin.
