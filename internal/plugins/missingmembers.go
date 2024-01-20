@@ -43,7 +43,7 @@ func (m *MissingMembersPlugin) isValidPlatform(platform string) bool {
 }
 
 func (m *MissingMembersPlugin) findMissingDiscordMembers(session *discordgo.Session, message *discordgo.MessageCreate) error {
-	members := memberlist.GetMembers()
+	members := _memberlist.GetMembers()
 	missingMembers := []memberlistentity.Member{}
 	guildMemberIDsToMembersInVoice := make(map[string]*discordgo.Member)
 	guild, err := session.Guild(message.GuildID)

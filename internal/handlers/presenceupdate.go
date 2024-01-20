@@ -4,12 +4,8 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/joeydotdev/corgi-discord-bot/internal/discord"
 	"github.com/joeydotdev/corgi-discord-bot/internal/memberlist"
-)
-
-const (
-	GUILD_ID             = "692873850530168843"
-	NOTIFICATION_CHANNEL = "1082687782331351090"
 )
 
 func isWebClientOrigin(status discordgo.ClientStatus) bool {
@@ -17,7 +13,7 @@ func isWebClientOrigin(status discordgo.ClientStatus) bool {
 }
 
 func getDiscordMemberFromDiscordUser(session *discordgo.Session, user *discordgo.User) (*discordgo.Member, error) {
-	guild, err := session.Guild(GUILD_ID)
+	guild, err := session.Guild(discord.GuildID)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +59,7 @@ func (h *Handler) PresenceUpdate(session *discordgo.Session, presenceUpdate *dis
 	}
 
 	msg := fmt.Sprintf("%s has connected to Discord through a web browser", presenceUpdate.User.Mention())
-	_, err = session.ChannelMessageSend(NOTIFICATION_CHANNEL, msg)
+	_, err = session.ChannelMessageSend(discord.AdminNotificationsChannelID, msg)
 
 	if err != nil {
 		fmt.Println("Failed to send message: ", err)

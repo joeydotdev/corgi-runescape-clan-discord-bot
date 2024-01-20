@@ -13,10 +13,10 @@ const (
 
 type ManageMemberlistPlugin struct{}
 
-var memberlist *memberlistentity.Memberlist
+var _memberlist *memberlistentity.Memberlist
 
 func init() {
-	memberlist = memberlistentity.NewMemberlist()
+	_memberlist = memberlistentity.NewMemberlist()
 }
 
 // Enabled returns whether or not the ManageMemberlistPlugin is enabled.
@@ -79,7 +79,7 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 	segments := strings.Split(message.Content, " ")
 	if len(segments) < 2 {
 		// list members
-		members := memberlist.GetMembers()
+		members := _memberlist.GetMembers()
 		memberString := ""
 		for _, member := range members {
 			memberString += member.Name + " - " + member.Accounts.LPC + "\n"
@@ -108,5 +108,5 @@ func (m *ManageMemberlistPlugin) Execute(session *discordgo.Session, message *di
 }
 
 func getMemberlist() *memberlistentity.Memberlist {
-	return memberlist
+	return _memberlist
 }
