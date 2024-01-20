@@ -16,13 +16,14 @@ func init() {
 	var err error
 	discordToken := os.Getenv("DISCORD_TOKEN")
 	session, err = discordgo.New("Bot " + discordToken)
-	session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildVoiceStates | discordgo.IntentsGuildMessages | discordgo.IntentGuildMembers
+	session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildVoiceStates | discordgo.IntentsGuildMessages | discordgo.IntentGuildMembers | discordgo.IntentsGuildPresences
 
 	if err != nil {
 		panic("failed to initalize bot")
 	}
 
 	handlers := discordHandlers.New()
+	session.AddHandler(handlers.PresenceUpdate)
 	session.AddHandler(handlers.MessageCreate)
 	session.AddHandler(handlers.Ready)
 
