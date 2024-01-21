@@ -3,6 +3,7 @@ package plugins
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -23,6 +24,7 @@ const (
 	POSITIVE_COLOR               = 0x86efac
 	NEGATIVE_COLOR               = 0x9f1239
 	MAXIMUM_EVENTS_PER_CYCLE     = 10
+	MAXIMUM_PLAYER_SPIKE_COUNT   = 1000
 )
 
 var WorldTrackerAlreadyRunningError error = errors.New("World tracker is already running. Stop the current instance before starting a new one.")
@@ -69,6 +71,10 @@ func (m *ManageWorldTrackerPlugin) sendTrackerEventMessages(session *discordgo.S
 	}
 
 	for _, event := range events {
+		if math.Abs(float64(event.PlayerSpikeCount)) > MAXIMUM_PLAYER_SPIKE_COUNT {
+			continue
+		}
+
 		isIncrease := event.PlayerSpikeCount > 0
 		worldLabel := "F2P"
 		if event.Members {
