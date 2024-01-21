@@ -58,7 +58,7 @@ func (h *Handler) PresenceUpdate(session *discordgo.Session, presenceUpdate *dis
 		return
 	}
 
-	msg := fmt.Sprintf("%s has connected to Discord through a web browser", presenceUpdate.User.Mention())
+	msg := fmt.Sprintf("%s has connected to Discord through a web browser", presenceUpdate.User.String())
 	_, err = session.ChannelMessageSend(discord.AdminNotificationsChannelID, msg)
 
 	if err != nil {
