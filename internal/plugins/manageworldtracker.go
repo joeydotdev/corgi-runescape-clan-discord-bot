@@ -13,7 +13,6 @@ import (
 
 const (
 	ManageWorldTrackerPluginName = "ManageWorldTrackerPlugin"
-	WorldTrackerChannelID        = "1198441422542602310"
 )
 
 type ManageWorldTrackerPlugin struct{}
@@ -57,7 +56,11 @@ func (m *ManageWorldTrackerPlugin) Name() string {
 
 // Validate validates whether or not we should execute ManageWorldTrackerPlugin on an incoming Discord message.
 func (m *ManageWorldTrackerPlugin) Validate(session *discordgo.Session, message *discordgo.MessageCreate) bool {
-	return strings.HasPrefix(message.Content, "!worldtracker") && message.ChannelID == WorldTrackerChannelID
+	channel, err := session.Channel(message.ChannelID)
+	if err != nil {
+		return false
+	}
+	return strings.HasPrefix(message.Content, "!worldtracker") && strings.Contains(channel.Name, "scout")
 }
 
 // sendTrackerEventMessages sends messages to Discord for each world tracker event.
